@@ -25,6 +25,9 @@ router.post('/form/new', formController.createForm);
 //create form item
 router.post('/form/item/new', formController.createFormItem);
 
+//create form item
+router.post('/form/step/new', formController.createFormStep);
+
 
 
 

@@ -170,7 +170,94 @@ module.exports = {
         }
 
 
-    }
+    },
+
+    createFormStep: async function(req, res){
+
+        let token = Utils.createToken({label:'formStep'});
+        let formToken = req.body.formToken;
+        let title = req.body.title;
+        let description = req.body.description;
+
+        const {usertoken, sessiontoken} = req.headers;
+
+
+        let proceed = await Utils.authenticate(usertoken, sessiontoken)
+
+
+        try{
+
+            if(proceed === true){
+                //@ check form existence 
+
+            let checkForm = await Form.find({
+                token : formToken,
+                status : 'Active',
+                existence : 1
+            });
+
+            //console.log(checkForm);
+
+            if(checkForm.length === 1){
+                //console.log("hi");
+                let findPreviousStep = await FormStep.find({
+                    formToken : formToken,
+                    status : "Active",
+                    existence: 1
+                }).sort({"createdAt":"desc"}).limit(1).exec();
+
+                //console.log(findPreviousStep);
+        
+        
+                if(findPreviousStep.length === 1){
+
+
+                    let updatePreviousStep = await FormStep.findOneAndUpdate(
+                        {_id : findPreviousStep[0]._id},
+                        {'$set': {nextStepToken : token}},{new : true}
+                    );
+
+                    if(updatePreviousStep){
+                        let dataToSave = {
+
+                            token : token,
+                            formToken : formToken,
+                            title : title,
+                            description : description,
+                            previousStepToken : findPreviousStep[0].token,
+                            nextStepToken : '',
+                            status : 'Active',
+                            existence : 1,
+                            createdBy : usertoken,
+                            sessionToken : sessiontoken
+            
+                        }
+    
+                        let createStep = await FormStep.create(dataToSave);
+    
+                        if(createStep){
+                            res.send("Success");
+                        }
+
+                    }
+                    
+                }
+
+            }
+            else{
+                res.send("Form doesn't Exist");
+            }
+
+            }
+            else{
+                res.send("Please log in First");
+            }
+        }
+        catch(error){
+            res.send(error);
+        }
+
+    },
 
 
 
