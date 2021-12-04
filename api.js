@@ -22,6 +22,9 @@ router.post('/logout', userController.userLogout);
 //create form
 router.post('/form/new', formController.createForm);
 
+//edit form
+router.post('/form/edit/:formToken', formController.editForm);
+
 //create form item
 router.post('/form/item/new', formController.createFormItem);
 

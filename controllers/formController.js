@@ -9,6 +9,7 @@ const FormItem = require('../models/FormItem'); // mongoose model
 
 const moment = require('moment'); // module
 const argon2 = require('argon2');
+const { title } = require('process');
 
 
 
@@ -252,6 +253,70 @@ module.exports = {
             else{
                 res.send("Please log in First");
             }
+        }
+        catch(error){
+            res.send(error);
+        }
+
+    },
+
+
+    editForm: async function(req, res){
+
+        let formToken = req.params.formToken;
+        const {usertoken, sessiontoken} = req.headers;
+        let {title, description} = req.body;
+
+        let proceed = await Utils.authenticate(usertoken, sessiontoken);
+        //console.log(proceed)
+
+        try{
+
+            if(proceed === true){
+                
+
+                //@check form
+                let checkForm = await Form.find({
+                    token : formToken,
+                    status : 'Active',
+                    existence : 1,
+                    createdBy : usertoken     
+                });
+
+                //console.log(checkForm);
+
+                if(checkForm.length === 1){
+
+                    if (title != undefined){
+                        titleToUpdate = title;
+                    }
+                    else{
+                        titleToUpdate = checkForm[0].title;
+                    }
+                    if (description != undefined){
+                        descriptionToUpdate = description;
+                    }
+                    else{
+                        descriptionToUpdate = checkForm[0].description;
+                    }
+
+                    dataToUpdate = {
+                        title : titleToUpdate,
+                        description : descriptionToUpdate
+                    }
+
+                    let updateForm = await Form.findOneAndUpdate(
+                        {_id : checkForm[0]._id},
+                        {'$set': dataToUpdate},
+                        {new : true}
+                    )
+
+                    if(updateForm){
+                        res.send("Success Edit")
+                    }
+                }
+            }
+
         }
         catch(error){
             res.send(error);
