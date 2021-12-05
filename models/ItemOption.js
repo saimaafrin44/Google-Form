@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-
-const formItemSchema = new mongoose.Schema({
+const itemOptionSchema = new mongoose.Schema({
     token: {
         type: String,
     },
@@ -11,18 +10,20 @@ const formItemSchema = new mongoose.Schema({
     stepToken: {
         type: String,
     },
+    itemToken: {
+        type: String,
+    },
+    itemType: {
+        type: String,
+    },
     title: {
         type: String
     },
-    image: {
+    titleType: {
         type: String
     },
-    inputType: {
-        type: String
-    },
-    required: {
-        type: Number
-    },
+
+    // common fields
     status: {
         type: String
     },
@@ -34,12 +35,9 @@ const formItemSchema = new mongoose.Schema({
     },  
     sessionToken: {
         type: String
-    },
-    positionKey: {
-        type: Number
     }
     
 }, {
     timestamps : true
 });
-module.exports = mongoose.model('FormItem', formItemSchema) 
+module.exports = mongoose.model('ItemOption', itemOptionSchema)

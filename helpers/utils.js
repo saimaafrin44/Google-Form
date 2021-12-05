@@ -74,7 +74,7 @@ const unixMS = () => {
 
  }
 
- let inputType = ['shortText', 'longText', 'file', 'radioButton', 'checkBox'];
+ let inputType = ["Short Text", "Long Text", "File", "Radio Button", "Checkbox"];
 
 
  

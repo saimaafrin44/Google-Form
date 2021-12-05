@@ -6,6 +6,7 @@ const Session = require('../models/Session'); // mongoose model
 const Form = require('../models/Form'); // mongoose model
 const FormStep = require('../models/FormStep'); // mongoose model
 const FormItem = require('../models/FormItem'); // mongoose model
+const ItemOption = require('../models/ItemOption'); // mongoose model
 
 const moment = require('moment'); // module
 const argon2 = require('argon2');
@@ -105,6 +106,10 @@ module.exports = {
         let required = req.body.required;
         let image = req.body.image;
 
+        let totalDocument = await FormItem.find();
+
+        let positionKey = totalDocument.length + 1;
+
         const {usertoken, sessiontoken} = req.headers;
         let proceed = await Utils.authenticate(usertoken, sessiontoken);
 
@@ -123,7 +128,8 @@ module.exports = {
                     status : 'Active',
                     existence: 1,
                     createdBy: usertoken,
-                    sessiontoken: sessiontoken
+                    sessiontoken: sessiontoken,
+                    positionKey: positionKey
                 }
 
                 
@@ -323,6 +329,115 @@ module.exports = {
         }
 
     },
+
+    createFormItemOption: async function(req, res){
+
+        let token = Utils.createToken({label : 'itemOption'});
+        const {usertoken, sessiontoken} = req.headers;
+        const { formToken, stepToken, itemToken, itemType, items} = req.body;
+        let proceed = await Utils.authenticate(sessiontoken, usertoken);
+
+        try{
+
+            let otherList = [];
+
+            for(let i = 0; i < items.length; i++){
+
+                //let thisItem = items[i];
+
+                if(data[i].titleType === 'other'){
+                    otherList.push(i)
+                }
+            }
+
+            if(otherList.length === 1){
+                let lastIndex = data.length - 1;
+                if(otherList[0] !== lastIndex){
+                    proceed = false;
+            }
+        }
+        else{
+            proceed = false;
+        }
+
+        if (proceed) {
+
+            let newItemOption;
+            for (let i = 0; i < items.length; i++) {
+                newItemOption = await ItemOption.create({
+                    'token': token,
+                    "formToken": formToken,
+                    "stepToken": stepToken,
+                    "itemToken": itemToken,
+                    "title": items[i].title,
+                    "itemType": itemType,
+                    "titleType": data[i].titleType,
+                    "status": "Active",
+                    "existence": 1,
+                    "createdBy": usertoken,
+                    "sessionToken": sessiontoken,
+                });
+            }
+            res.send({
+                "type": "success",
+                "data": newItemOption
+            });    
+
+        }
+    }
+        catch(error){
+            res.send(error);
+        }
+
+    },
+
+
+    updateItemPositionKey: async function(req, res){
+
+        const {usertoken, sessiontoken} = req.headers;
+        let proceed = await Utils.authenticate(usertoken, sessiontoken);
+        let formToken = req.body.formToken;
+        let stepToken = req.body.stepToken;
+        let data = req.body.data;
+
+        try{
+
+
+            // @ checkForm
+            let checkForm = await FormStep.find({
+                'token' : stepToken,
+                'formToken' : formToken
+
+            })
+
+            if(checkForm.length === 0){
+                proceed = false;
+            }
+
+            // @check step
+            if(proceed === true){
+
+                console.log(proceed);
+
+                for(let i = 0; i < data.length; i++){
+                    let thisData = data[i];
+
+                    let updatePositionKey = await FormItem.findOneAndUpdate(
+                        {'token' : thisData.itemToken},
+                        {'$set' : {positionKey : thisData.positionKey}},
+                        {new : true}
+                    )
+                }
+
+                res.send("Items position keys updated")
+            }
+
+
+        }
+        catch(error){
+            res.send(error);
+        }
+    }
 
 
 
