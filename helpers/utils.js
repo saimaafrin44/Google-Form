@@ -7,12 +7,12 @@ const Session = require('../models/Session'); // mongoose model
 
 
 
-// @returns a random number by given length
+// @returns a random number 
 const numRand = (length) => {
     let result           = [];
-    let characters       = '0123456789';
+    let characters       = '123456789';
     let charactersLength = characters.length;
-    for ( let i = 0; i < length; i++ ) {
+    for ( let j = 0; j < length; j++ ) {
       result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
     }
    return result.join('');
