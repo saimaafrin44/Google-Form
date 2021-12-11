@@ -7,7 +7,7 @@ const Session = require('../models/Session'); // mongoose model
 
 
 
-// @returns a random number by given length - Author: Istiaq Hasan
+// @returns a random number by given length
 const numRand = (length) => {
     let result           = [];
     let characters       = '0123456789';
